@@ -57,7 +57,7 @@ with st.sidebar:
     st.title("⚡ SEO/GEO Factory")
     st.caption("Tool interno — generazione contenuti ottimizzati")
     st.divider()
-  st.markdown("**Flusso di lavoro:**")
+    st.markdown("**Flusso di lavoro:**")
     st.markdown("1. Dati azienda\n2. Modalità e pagine\n3. Geo targeting\n4. Genera\n5. Esporta")
     st.divider()
     api_key = st.text_input("Anthropic API Key", type="password",
