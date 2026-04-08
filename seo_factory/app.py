@@ -62,8 +62,11 @@ with st.sidebar:
     st.divider()
     api_key = st.text_input("Anthropic API Key", type="password",
                              help="La chiave viene usata solo per questa sessione")
-    if api_key:
-        os.environ["ANTHROPIC_API_KEY"] = api_key
+ if "ANTHROPIC_API_KEY" in st.secrets:
+    os.environ["ANTHROPIC_API_KEY"] = st.secrets["ANTHROPIC_API_KEY"]
+
+if api_key:
+    os.environ["ANTHROPIC_API_KEY"] = api_key
         st.success("API Key impostata")
 
 st.title("SEO/GEO Content Factory")
