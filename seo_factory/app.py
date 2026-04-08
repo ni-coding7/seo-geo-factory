@@ -57,16 +57,15 @@ with st.sidebar:
     st.title("⚡ SEO/GEO Factory")
     st.caption("Tool interno — generazione contenuti ottimizzati")
     st.divider()
-    st.markdown("**Flusso di lavoro:**")
+  st.markdown("**Flusso di lavoro:**")
     st.markdown("1. Dati azienda\n2. Modalità e pagine\n3. Geo targeting\n4. Genera\n5. Esporta")
     st.divider()
     api_key = st.text_input("Anthropic API Key", type="password",
                              help="La chiave viene usata solo per questa sessione")
- if "ANTHROPIC_API_KEY" in st.secrets:
-    os.environ["ANTHROPIC_API_KEY"] = st.secrets["ANTHROPIC_API_KEY"]
-
-if api_key:
-    os.environ["ANTHROPIC_API_KEY"] = api_key
+    if "ANTHROPIC_API_KEY" in st.secrets:
+        os.environ["ANTHROPIC_API_KEY"] = st.secrets["ANTHROPIC_API_KEY"]
+    if api_key:
+        os.environ["ANTHROPIC_API_KEY"] = api_key
         st.success("API Key impostata")
 
 st.title("SEO/GEO Content Factory")
