@@ -76,7 +76,7 @@ with st.sidebar:
     elif st.session_state.get("api_key"):
         os.environ["ANTHROPIC_API_KEY"] = st.session_state["api_key"]
         st.success("API Key attiva")
-
+st.write("DEBUG KEY:", os.environ.get("ANTHROPIC_API_KEY", "NON TROVATA")[:20])
 st.title("SEO/GEO Content Factory")
 st.caption("Genera contenuti ottimizzati per SEO e geo-targeting. Compila i dati aziendali e avvia la generazione.")
 
