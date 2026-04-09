@@ -8,6 +8,11 @@ import time
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+try:
+    os.environ["ANTHROPIC_API_KEY"] = st.secrets["ANTHROPIC_API_KEY"]
+except Exception:
+    pass
+
 from core.scraper import scrape_multiple
 from core.geo_enricher import get_city_context, get_suggested_cities
 from core.ai_generator import generate_page_content
