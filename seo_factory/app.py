@@ -49,6 +49,8 @@ if "token_report" not in st.session_state:
     st.session_state.token_report = {"total_input": 0, "total_output": 0, "pages": []}
 if "output_dir" not in st.session_state:
     st.session_state.output_dir = None
+if "api_key" not in st.session_state:
+    st.session_state.api_key = ""
 
 
 def estimate_cost(n_pages: int) -> float:
@@ -67,18 +69,19 @@ with st.sidebar:
     st.divider()
     api_key = st.text_input("Anthropic API Key", type="password",
                              help="La chiave viene usata solo per questa sessione")
-    if "ANTHROPIC_API_KEY" in st.secrets:
-        os.environ["ANTHROPIC_API_KEY"] = st.secrets["ANTHROPIC_API_KEY"]
     if api_key:
+        st.session_state["api_key"] = api_key
         os.environ["ANTHROPIC_API_KEY"] = api_key
         st.success("API Key impostata")
+    elif st.session_state.get("api_key"):
+        os.environ["ANTHROPIC_API_KEY"] = st.session_state["api_key"]
+        st.success("API Key attiva")
 
 st.title("SEO/GEO Content Factory")
 st.caption("Genera contenuti ottimizzati per SEO e geo-targeting. Compila i dati aziendali e avvia la generazione.")
 
 tab1, tab2, tab3, tab4 = st.tabs(["① Dati Azienda", "② Pagine & Modalità", "③ Geo Targeting", "④ Genera & Esporta"])
 
-# ─── TAB 1: DATI AZIENDA ────────────────────────────────────────────────────
 with tab1:
     st.subheader("Dati aziendali")
     st.caption("Questi dati vengono usati per costruire contenuti coerenti e gli schema JSON-LD. Compila tutto quello che hai disponibile.")
@@ -109,7 +112,6 @@ with tab1:
         services_raw = st.text_area("Un servizio per riga *",
                                      placeholder="Elettropompe sommerse\nPompe centrifughe\nManutenzione impianti\nConsulenza tecnica",
                                      height=120)
-
         st.markdown("**Proposta di valore (USP)**")
         usp = st.text_area("Cosa vi distingue dalla concorrenza? *",
                             placeholder="20 anni di esperienza, assistenza 24/7, unici certificati ISO in Lombardia...",
@@ -120,12 +122,10 @@ with tab1:
         target = st.selectbox("Target cliente", ["B2B", "B2C", "B2B + B2C"])
         tone = st.selectbox("Tono di voce", ["Professionale e tecnico", "Friendly e accessibile",
                                                "Autorevole e formale", "Diretto e concreto"])
-
         st.markdown("**Profili social (opzionale)**")
         social_raw = st.text_area("Un profilo per riga",
                                    placeholder="https://www.facebook.com/esempio\nhttps://www.linkedin.com/company/esempio",
                                    height=70)
-
         st.markdown("**Orari apertura (opzionale)**")
         opening_hours_raw = st.text_input("Formato Schema.org", placeholder="Mo-Fr 09:00-18:00, Sa 09:00-13:00")
 
@@ -157,7 +157,6 @@ with tab1:
         "description": description,
     }
 
-# ─── TAB 2: PAGINE & MODALITÀ ───────────────────────────────────────────────
 with tab2:
     st.subheader("Modalità e pagine da generare")
 
@@ -219,7 +218,6 @@ with tab2:
     else:
         existing_urls = {}
 
-# ─── TAB 3: GEO TARGETING ───────────────────────────────────────────────────
 with tab3:
     st.subheader("Geo Targeting")
 
@@ -236,7 +234,7 @@ with tab3:
         if user_cities:
             suggestions = get_suggested_cities(user_cities)
             if suggestions:
-                st.caption(f"Basate sulla regione delle tue città:")
+                st.caption("Basate sulla regione delle tue città:")
                 extra_cities = st.multiselect("Aggiungi dalle suggerite", suggestions, default=[])
             else:
                 st.caption("Nessun suggerimento disponibile per le città inserite")
@@ -249,14 +247,12 @@ with tab3:
 
     if all_cities:
         st.success(f"**{len(all_cities)} città** selezionate: {', '.join(all_cities)}")
-        extra_cost = estimate_cost(len(all_cities))
         total_pages = n_pages + len(all_cities) if gen_city else n_pages
         total_cost = estimate_cost(total_pages)
         st.markdown(f'<span class="cost-badge">💰 Costo totale stimato (tutte le pagine): ~${total_cost} USD</span>', unsafe_allow_html=True)
         if not gen_city:
             st.markdown('<span class="warning-badge">⚠️ Abilita "City Pages" nel Tab 2 per generarle</span>', unsafe_allow_html=True)
 
-# ─── TAB 4: GENERA & ESPORTA ────────────────────────────────────────────────
 with tab4:
     st.subheader("Genera contenuti")
 
@@ -264,7 +260,7 @@ with tab4:
         st.warning("⚠️ Completa almeno: Nome azienda, Settore e Servizi nel Tab 1 prima di generare.")
         st.stop()
 
-    if not os.environ.get("ANTHROPIC_API_KEY"):
+    if not os.environ.get("ANTHROPIC_API_KEY") and not st.session_state.get("api_key"):
         st.warning("⚠️ Inserisci la tua API Key Anthropic nella sidebar.")
         st.stop()
 
@@ -286,6 +282,9 @@ with tab4:
     st.divider()
 
     if st.button("🚀 Avvia generazione", type="primary", use_container_width=True):
+
+        if st.session_state.get("api_key"):
+            os.environ["ANTHROPIC_API_KEY"] = st.session_state["api_key"]
 
         st.session_state.generated_pages = []
         st.session_state.token_report = {"total_input": 0, "total_output": 0, "pages": []}
