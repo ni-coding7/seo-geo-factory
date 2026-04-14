@@ -2,7 +2,7 @@ import anthropic
 import json
 import re
 
-client = anthropic.Anthropic()
+# Rimosso il client globale per evitare errori di inizializzazione senza chiave
 
 PAGE_PROMPTS = {
     "home": """Sei un copywriter SEO esperto. Scrivi i contenuti ottimizzati per la HOME PAGE.
@@ -126,99 +126,4 @@ JSON con questa struttura esatta:
 
 
 def build_company_block(company: dict) -> str:
-    """Build a compact company context string to minimize tokens."""
-    services = ", ".join(company.get("services", []))
-    usp = company.get("usp", "")
-    tone = company.get("tone", "professionale")
-    target = company.get("target", "B2C")
-    city = company.get("city", "")
-    sector = company.get("sector", "")
-
-    return (
-        f"Nome: {company['name']} | Settore: {sector} | Città sede: {city} | "
-        f"Servizi: {services} | Target: {target} | Tono: {tone} | "
-        f"USP: {usp} | Tel: {company.get('phone','')} | Email: {company.get('email','')} | "
-        f"Sito: {company.get('website','')} | Anno fondazione: {company.get('founding_year','')}"
-    )
-
-
-def build_geo_block(geo_context: dict) -> str:
-    """Build compact geo context string."""
-    if not geo_context:
-        return ""
-    pois = geo_context.get("poi_text", "")
-    climate = geo_context.get("climate", "")
-    region = geo_context.get("region", "")
-    return f"Regione: {region} | Clima: {climate} | POI locali: {pois}"
-
-
-def build_existing_block(scraped_data: dict) -> str:
-    """Build existing content block from scraped page."""
-    if not scraped_data or not scraped_data.get("success"):
-        return ""
-    title = scraped_data.get("title", "")
-    body = scraped_data.get("body_text", "")[:800]
-    return f"\nContenuto attuale da ottimizzare — Titolo: {title} | Testo: {body}"
-
-
-def generate_page_content(
-    page_type: str,
-    company: dict,
-    geo_context: dict = None,
-    scraped_data: dict = None,
-    service_name: str = None,
-    city: str = None,
-) -> dict:
-    """Generate optimized content for a page using Claude Haiku."""
-
-    company_block = build_company_block(company)
-    geo_block = build_geo_block(geo_context) if geo_context else ""
-    existing_block = build_existing_block(scraped_data) if scraped_data else ""
-
-    if page_type == "city_page" and geo_context:
-        prompt = PAGE_PROMPTS["city_page"].format(
-            company_block=company_block,
-            city=city or geo_context.get("city", ""),
-            region=geo_context.get("region", ""),
-            climate=geo_context.get("climate", ""),
-            pois=geo_context.get("poi_text", ""),
-            services=", ".join(company.get("services", []))
-        )
-    elif page_type == "servizio" and service_name:
-        prompt = PAGE_PROMPTS["servizio"].format(
-            company_block=company_block,
-            service_name=service_name,
-            geo_block=geo_block,
-            existing_block=existing_block
-        )
-    else:
-        template = PAGE_PROMPTS.get(page_type, PAGE_PROMPTS["home"])
-        prompt = template.format(
-            company_block=company_block,
-            geo_block=geo_block,
-            existing_block=existing_block,
-            service_name=service_name or ""
-        )
-
-    response = client.messages.create(
-        model="claude-haiku-4-5-20251001",
-        max_tokens=1200,
-        messages=[{"role": "user", "content": prompt}]
-    )
-
-    raw = response.content[0].text.strip()
-
-    raw = re.sub(r"^```json\s*", "", raw)
-    raw = re.sub(r"```\s*$", "", raw)
-    raw = raw.strip()
-
-    try:
-        content = json.loads(raw)
-    except json.JSONDecodeError:
-        content = {"error": "JSON parse failed", "raw": raw}
-
-    return {
-        "content": content,
-        "input_tokens": response.usage.input_tokens,
-        "output_tokens": response.usage.output_tokens,
-    }
+    services = ", ".join
