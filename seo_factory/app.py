@@ -8,7 +8,7 @@ import time
 from urllib.parse import urlparse
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 # --- Config prezzi (unico posto da aggiornare) ---
 PRICING = {
     "input_per_token": 0.00000025,
